@@ -5,9 +5,9 @@ INCL_DIR	=	include
 SRC_DIR		=	sources
 OBJ_DIR		=	objects
 
-SRCS		=	$(wildcard $(SRC_DIR)/*.cpp)
-
-OBJS		=	$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
+SOURCES		=	main.cpp ScalarConverter.cpp parsing.cpp handle_cases.cpp
+SRCS		=	$(addprefix $(SRC_DIR)/, $(SOURCES))
+OBJS		=	$(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 
 all:			$(NAME)
 
