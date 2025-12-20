@@ -12,7 +12,7 @@
 
 #include "Tools.hpp"
 #include "ScalarConverter.hpp"
-
+//change test;
 int special_case(int special) // 2 = +inf, 3 = -inf, 4 = nan
 {
 	std::string special_cases[5] = {"", "", "+inf", "-inf", "nan"};
