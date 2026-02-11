@@ -6,13 +6,15 @@
 /*   By: bszikora <bszikora@student.42helbronn.d    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 15:23:09 by bszikora          #+#    #+#             */
-/*   Updated: 2025/09/30 17:12:17 by bszikora         ###   ########.fr       */
+/*   Updated: 2026/02/11 11:10:13 by bszikora         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Tools.hpp"
 #include "ScalarConverter.hpp"
-//change test;
+
+#include <cmath>
+
 int special_case(int special) // 2 = +inf, 3 = -inf, 4 = nan
 {
 	std::string special_cases[5] = {"", "", "+inf", "-inf", "nan"};
@@ -48,6 +50,10 @@ void itsa_int(s_values *info)
 		info->int_possible = false;
         
     }
+	if (info->int_possible)
+		info->char_possible = (info->integernum >= 0 && info->integernum <= 127);
+	else
+		info->char_possible = false;
 	info->doublenum = static_cast<double>(info->integernum);
 	info->floatingnum = static_cast<float>(info->integernum);
 	info->charchar = static_cast<char>(info->integernum);
@@ -55,18 +61,88 @@ void itsa_int(s_values *info)
 
 void itsa_float(s_values *info)
 {	
-	info->floatingnum = std::stof(info->input);
+	try {
+		info->floatingnum = std::stof(info->input);
+	} catch (...) {
+		info->float_possible = false;
+		info->double_possible = false;
+		info->int_possible = false;
+		info->char_possible = false;
+		info->floatingnum = 0.0f;
+		info->doublenum = 0.0;
+		info->integernum = 0;
+		info->charchar = '\0';
+		return;
+	}
+
 	info->doublenum = static_cast<double>(info->floatingnum);
-	info->integernum = static_cast<int>(info->floatingnum);
-	info->charchar = static_cast<char>(info->floatingnum);
+
+	if (std::isnan(info->floatingnum) || std::isinf(info->floatingnum))
+	{
+		info->char_possible = false;
+		info->int_possible = false;
+		info->integernum = 0;
+		info->charchar = '\0';
+		return;
+	}
+
+	info->char_possible = (info->floatingnum >= 0.0f && info->floatingnum <= 127.0f);
+	if (info->char_possible)
+		info->charchar = static_cast<char>(info->floatingnum);
+	else
+		info->charchar = '\0';
+
+	info->int_possible = (info->floatingnum >= static_cast<float>(INT_MIN)
+					&& info->floatingnum <= static_cast<float>(INT_MAX));
+	if (info->int_possible)
+		info->integernum = static_cast<int>(info->floatingnum);
+	else
+		info->integernum = 0;
 }
 
 void itsa_double(s_values *info)
 {	
-	info->doublenum = std::stod(info->input);
-	info->integernum = static_cast<int>(info->doublenum);
-	info->floatingnum = static_cast<float>(info->doublenum);
-	info->charchar = static_cast<char>(info->doublenum);
+	try {
+		info->doublenum = std::stod(info->input);
+	} catch (...) {
+		info->double_possible = false;
+		info->float_possible = false;
+		info->int_possible = false;
+		info->char_possible = false;
+		info->doublenum = 0.0;
+		info->floatingnum = 0.0f;
+		info->integernum = 0;
+		info->charchar = '\0';
+		return;
+	}
+
+	if (std::isnan(info->doublenum) || std::isinf(info->doublenum))
+	{
+		info->char_possible = false;
+		info->int_possible = false;
+		info->float_possible = false;
+		info->floatingnum = 0.0f;
+		info->integernum = 0;
+		info->charchar = '\0';
+		return;
+	}
+
+	info->float_possible = (info->doublenum >= -static_cast<double>(FLT_MAX)
+					&& info->doublenum <= static_cast<double>(FLT_MAX));
+	info->floatingnum = info->float_possible ? static_cast<float>(info->doublenum) : 0.0f;
+
+	info->char_possible = (info->doublenum >= 0.0 && info->doublenum <= 127.0);
+	if (info->char_possible)
+		info->charchar = static_cast<char>(info->doublenum);
+	else
+		info->charchar = '\0';
+
+	info->int_possible = (info->doublenum >= static_cast<double>(INT_MIN)
+					&& info->doublenum <= static_cast<double>(INT_MAX));
+	if (info->int_possible)
+		info->integernum = static_cast<int>(info->doublenum);
+	else
+		info->integernum = 0;
 }
 
 static bool is_print(char c)
@@ -76,6 +152,19 @@ static bool is_print(char c)
 
 void print_cases(s_values *info)
 {
+	bool float_is_int = false;
+	bool double_is_int = false;
+	if (info->float_possible && !std::isnan(info->floatingnum) && !std::isinf(info->floatingnum))
+	{
+		double ip;
+		float_is_int = (std::modf(static_cast<double>(info->floatingnum), &ip) == 0.0);
+	}
+	if (info->double_possible && !std::isnan(info->doublenum) && !std::isinf(info->doublenum))
+	{
+		double ip;
+		double_is_int = (std::modf(info->doublenum, &ip) == 0.0);
+	}
+
     std::cout << "char: ";
     if (!info->char_possible)
         std::cout << "impossible";
@@ -95,7 +184,7 @@ void print_cases(s_values *info)
     std::cout << "float: ";
     if (!info->float_possible)
         std::cout << "impossible";
-    else if (info->type == TYPE_INT || (info->floatingnum - static_cast<int>(info->floatingnum)) == 0)
+	else if (info->type == TYPE_INT || float_is_int)
         std::cout << info->floatingnum << ".0f";
     else
         std::cout << info->floatingnum << "f";
@@ -104,7 +193,7 @@ void print_cases(s_values *info)
     std::cout << "double: ";
     if (!info->double_possible) {
         std::cout << "impossible";
-    } else if (info->type == TYPE_INT || (info->doublenum - static_cast<int>(info->doublenum)) == 0) {
+	} else if (info->type == TYPE_INT || double_is_int) {
         std::cout << info->doublenum << ".0";
     } else {
         std::cout << info->doublenum;

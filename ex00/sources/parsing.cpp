@@ -6,33 +6,20 @@
 /*   By: bszikora <bszikora@student.42helbronn.d    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 12:55:03 by bszikora          #+#    #+#             */
-/*   Updated: 2025/09/30 17:12:53 by bszikora         ###   ########.fr       */
+/*   Updated: 2026/02/11 11:07:00 by bszikora         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Tools.hpp"
 
-static bool are_u_asci(s_values *info, int l_or_s) // 0 = l
-{
-    (void) l_or_s;
-        if (std::stold(info->input) > 127)
-        {
-            info->char_possible = false;
-            return 1;
-        }
-    return 0;
-}
-
 static bool	is_lchar(s_values *info)
 {
-	are_u_asci(info, 0);
 	return (info->input.size() == 3 && info->input.front() == '\'' && info->input.back() == '\''
 		&& std::isprint(static_cast<unsigned char>(info->input[1])));
 }
 
 static bool	is_schar(s_values *info)
 {
-	are_u_asci(info, 1);
 	return (info->input.size() == 1 && std::isprint(static_cast<unsigned char>(info->input[0]))
 		&& !std::isdigit(static_cast<unsigned char>(info->input[0])));
 }
@@ -154,8 +141,8 @@ static int	is_double(s_values *info)
         info->double_possible = true;
         return sawDot && sawDigit;
     } catch (const std::out_of_range &) {
-        info->double_possible = true;
-        return sawDot && sawDigit;
+        info->double_possible = false;
+        return false;
     } catch (...) {
         info->double_possible = false;
         return false;
