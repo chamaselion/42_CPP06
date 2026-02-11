@@ -6,7 +6,7 @@
 /*   By: bszikora <bszikora@student.42helbronn.d    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 15:23:09 by bszikora          #+#    #+#             */
-/*   Updated: 2026/02/11 11:10:13 by bszikora         ###   ########.fr       */
+/*   Updated: 2026/02/11 12:06:00 by bszikora         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int special_case(int special) // 2 = +inf, 3 = -inf, 4 = nan
 	std::string special_cases[5] = {"", "", "+inf", "-inf", "nan"};
 	std::string fspecial_cases[5] = {"", "", "+inff", "-inff", "nanf"};
 
-	std::cout << special << std::endl;
+	// std::cout << special << std::endl;
 	if (special == 2 || special == 3 || special == 4)
 	{
 		std::cout << "char: " << "impossible" << std::endl;
